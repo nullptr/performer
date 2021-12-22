@@ -10,6 +10,7 @@
 #include "usbh_lld_stm32f4.h"		/// provides low level usb host driver for stm32f4 platform
 #include "usbh_driver_hub.h"		/// provides usb full speed hub driver (Low speed devices on hub are not supported)
 #include "usbh_driver_ac_midi.h"	/// provides usb device driver for midi class devices
+#include "usbh_driver_hid.h"
 
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
@@ -27,6 +28,7 @@ static UsbH *g_usbh;
 
 static const usbh_dev_driver_t *device_drivers[] = {
 	&usbh_hub_driver,
+        &usbh_hid_driver,
 	&usbh_midi_driver,
 	nullptr
 };
@@ -47,6 +49,26 @@ static uint8_t writeBuffer[2][WriteBufferSize];
 static size_t writeBufferSize;
 static size_t writeBufferIndex;
 static size_t writeBufferPos;
+
+Keyboard keyboard;
+
+struct HIDDriverHandler {
+    static void inputHandler(uint8_t device, const uint8_t* data, uint32_t length) {
+        if (length < 3) {
+            return;
+        }
+
+        uint16_t m = data[2];
+        if (length > 3) {
+            m |= data[3] << 16;
+        }
+        keyboard.write(m);
+    }
+};
+
+static const hid_config_t hid_config {
+    .hid_in_message_handler = &HIDDriverHandler::inputHandler,
+};
 
 struct MidiDriverHandler {
 
@@ -216,6 +238,7 @@ void UsbH::init() {
 	gpio_set_af(GPIOA, GPIO_AF10, GPIO11 | GPIO12);
 
 	hub_driver_init();
+        hid_driver_init(&hid_config);
 	midi_driver_init(&midi_config);
 	usbh_init(lld_drivers, device_drivers);
 }

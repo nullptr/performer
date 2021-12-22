@@ -4,6 +4,8 @@
 
 #include <cstdint>
 
+using Keyboard = RingBuffer<uint16_t, 16>;
+
 class UsbH {
 public:
     UsbH(UsbMidi &usbMidi);

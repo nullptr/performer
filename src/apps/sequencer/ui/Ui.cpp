@@ -121,9 +121,243 @@ void Ui::showAssert(const char *filename, int line, const char *msg) {
     _lcd.draw(_frameBuffer.data());
 }
 
+static uint8_t lastKeyPressed[] = {0, 0};
+
+// Using the scancodes defined at https://www.win.tue.nl/~aeb/linux/kbd/scancodes-14.html.
+// This mapping is also likely something others would want to change, as it is very specific to
+// taste and underlying layout (Colemak-DH in my case).
+static int8_t keyMap[] = {
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::Step8,
+    Key::Code::Play,
+    Key::Code::Step3,
+    Key::Code::Step4,
+    Key::Code::Step13,
+    Key::Code::Track2,
+    Key::Code::Pattern,
+    Key::Code::Step5,
+    Key::Code::Step14,
+    Key::Code::Tempo,
+    Key::Code::Performer,
+    Key::Code::Track4,
+    Key::Code::Right,
+    Key::Code::Step12,
+    Key::Code::Step15,
+    Key::Code::Track3,
+    Key::Code::Track0,
+    Key::Code::Step9,
+    Key::Code::Step10,
+    Key::Code::Step11,
+    Key::Code::Track5,
+    Key::Code::Left,
+    Key::Code::Track1,
+    Key::Code::Step2,
+    Key::Code::Track6,
+    Key::Code::Step1,
+    Key::Code::F0,
+    Key::Code::F1,
+    Key::Code::F2,
+    Key::Code::F3,
+    Key::Code::F4,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::Track7,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::Step6,
+    Key::Code::Step7,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::None,
+    Key::Code::Shift,
+    Key::Code::Page,
+    Key::Code::None,
+};
+
 void Ui::handleKeys() {
-    ButtonLedMatrix::Event event;
-    while (_blm.nextEvent(event)) {
+    const auto processEvent = [this](ButtonLedMatrix::Event& event) {
         bool isDown = event.action() == ButtonLedMatrix::Event::KeyDown;
         _pageKeyState[event.value()] = isDown;
         _globalKeyState[event.value()] = isDown;
@@ -133,6 +367,55 @@ void Ui::handleKeys() {
         if (isDown) {
             KeyPressEvent keyPressEvent = _keyPressEventTracker.process(key);
             _pageManager.dispatchEvent(keyPressEvent);
+        }
+    };
+
+    ButtonLedMatrix::Event event{};
+    while (_blm.nextEvent(event)) {
+        processEvent(event);
+    }
+    while (!keyboard.empty()) {
+        const auto k = keyboard.read();
+        const auto k1 = keyMap[k & 0xff];
+        const auto k2 = keyMap[(k >> 16) & 0xff];
+        if (k1 != Key::Code::None) {
+            // Check if the first last key was released
+            if (lastKeyPressed[0] && lastKeyPressed[0] != k1) {
+                event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyUp, lastKeyPressed[0]);
+                processEvent(event);
+            }
+            event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyDown, k1);
+            processEvent(event);
+            lastKeyPressed[0] = k1;
+
+            if (k2 != Key::Code::None) {
+                // Check if the second last key was released
+                if (lastKeyPressed[1] && lastKeyPressed[1] != k1 && lastKeyPressed[1] != k2) {
+                    event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyUp, lastKeyPressed[1]);
+                    processEvent(event);
+                }
+                event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyDown, k2);
+                processEvent(event);
+                lastKeyPressed[1] = k2;
+            } else {
+                if (lastKeyPressed[1]) {
+                    event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyUp, lastKeyPressed[1]);
+                    processEvent(event);
+                    lastKeyPressed[1] = 0;
+                }
+            }
+        } else {
+            // No key presses, clear everything
+            if (lastKeyPressed[1]) {
+                event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyUp, lastKeyPressed[1]);
+                processEvent(event);
+                lastKeyPressed[1] = 0;
+            }
+            if (lastKeyPressed[0]) {
+                event = ButtonLedMatrix::Event(ButtonLedMatrix::Event::KeyUp, lastKeyPressed[0]);
+                processEvent(event);
+                lastKeyPressed[0] = 0;
+            }
         }
     }
 }

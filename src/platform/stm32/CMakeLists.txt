@@ -41,6 +41,7 @@ set(platform_sources
     # libusbhost
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/libusbhost/src/usbh_core.c
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/libusbhost/src/usbh_driver_ac_midi.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/libs/libusbhost/src/usbh_driver_hid.c
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/libusbhost/src/usbh_driver_hub.c
     ${CMAKE_CURRENT_SOURCE_DIR}/libs/libusbhost/src/usbh_lld_stm32f4.c
     PARENT_SCOPE
@@ -84,9 +85,11 @@ find_program(KERMIT ckermit)
 
 # OpenOCD configuration
 
-set(OPENOCD_INTERFACE ftdi/olimex-arm-usb-ocd-h)
+#set(OPENOCD_INTERFACE ftdi/olimex-arm-usb-ocd-h)
+set(OPENOCD_INTERFACE jlink)
 set(OPENOCD_TARGET stm32f4x)
-set(OPENOCD_INTERFACE ftdi/olimex-arm-usb-ocd-h PARENT_SCOPE)
+#set(OPENOCD_INTERFACE ftdi/olimex-arm-usb-ocd-h PARENT_SCOPE)
+set(OPENOCD_INTERFACE jlink PARENT_SCOPE)
 set(OPENOCD_TARGET stm32f4x PARENT_SCOPE)
 
 # functions
